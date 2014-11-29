@@ -45,9 +45,17 @@ val t12 = enDva [2] = false
 val t13 = enDva [1, 2, 2] = false
 
 (* Konstruktor števca *)
-(*
-fun stevec = {naslednji: 1}
-  *)
+val s = ref 0
+fun stevec () = {
+  naslednji = fn () => (s := !s + 1; !s),
+  ponastavi = fn () => s := 0
+}
+val stev = stevec ()
+val s1 = #naslednji stev () = 1
+val s2 = #naslednji stev () = 2
+val s3 = #naslednji stev () = 3
+val _  = #ponastavi stev ()
+val s4 = #naslednji stev () = 1
 
 (* Implementacija sklada *)
 signature M_STACK = 
@@ -63,10 +71,8 @@ struct
   type 'a mstack = 'a list ref
   fun new el = ref [el]
   fun push (s, el) = s := el :: (!s)
-  fun pop s =
-    case !s of
-      []      => NONE
-    | x :: xs => (s := xs; SOME x)
+  fun pop (ref []) = NONE
+    | pop (s as ref (x :: xs)) = (s := xs; SOME x)
 end
 val s = Sklad.new 3
 val _ = Sklad.push (s, 4)
@@ -84,17 +90,43 @@ and 'a pcell = Nil | Cons of 'a * 'a pcl
 
 (* Funkcije za delo s tipom pcl *)
 exception Empty
-val nill = Pcl (ref Nil) : int pcl
+fun nill () = Pcl (ref Nil) : int pcl
 fun cons arg = Pcl (ref (Cons arg))
-fun car arg =
+fun car (Pcl arg) =
   case !arg of
     Nil => raise Empty
   | Cons (x, _) => x
-fun cdr arg =
+fun cdr (Pcl arg) =
   case !arg of
     Nil => raise Empty
   | Cons (_, xs) => xs
 
 (* Testi za pcl *)
-val t19 = cons (7, cons (6, cons (5, cons (4, cons (3, nill)))))
+val t19 = cons (7, cons (6, cons (5, cons (4, cons (3, nill ())))))
 val t20 = car t19
+val t21 = cdr t19
+
+(* Funkcija stl *)
+fun stl (Pcl (r as ref (Cons (h, t))), u) = (r := Cons (h, u))
+
+(* Seznam samih enic *)
+val t22 = cons (1, nill ())
+val _ = stl (t22, t22)
+
+(* Seznam 1, 2, 1, 2 ... - rezultat je v spremenljivki t24 *)
+val t23 = cons (2, nill ())
+val t24 = cons (1, t23)
+val _ = stl (t23, t24)
+
+(* Pridobimo seznam prvih n elementov *)
+fun take n pclist =
+  let
+    fun take_acc 0 _ acc = rev acc
+      | take_acc _ (Pcl (ref (Nil))) acc = rev acc
+      | take_acc n (Pcl (ref (Cons (x, xs)))) acc =
+          take_acc (n - 1) xs (x :: acc)
+  in
+    take_acc n pclist []
+  end
+val t25 = take 10 t22
+val t26 = take 10 t24

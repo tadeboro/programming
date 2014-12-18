@@ -43,8 +43,8 @@
 (define (moj-map f sez)
   (if (null? sez)
       null
-      (cons (f (car sez)) (moj-map (cdr sez)))))
-;(moj-map (lambda (x) (* x 2)) '(1 2 3))
+      (cons (f (car sez)) (moj-map f (cdr sez)))))
+(moj-map (lambda (x) (* x 2)) '(1 2 3))
 
 ; moj-reverse
 (define (moj-reverse xs)
@@ -66,18 +66,31 @@
                   (cons prvi (odstrani-ponovljene (cdr sez)))))]))
 (odstrani-ponovljene '(1 1 1 2 2 3 4 4))
 
-; Ućinkovita vrsta
+; Učinkovita vrsta
 (define (queue)
-  (list null null)
+  (list null null))
 (define (empty-queue? q)
-  (and (null? (car q)) (null? (car (cdr q)))))
+  (and (null? (car q)) (null? (cadr q))))
 (define (enqueue el q)
   (cons (cons el (car q)) (cdr q)))
 (define (dequeue q)
-  (cons [(empty-queue? q) (cons void q)]
-        [(null? (car (cdr q))) (dequeue (cons null (reverse (car q))))]
-        [#t (car (car (cdr q))) (cons (car q) (cdr (car (cdr q))))]))
-
+  (cond [(empty-queue? q) (cons void q)]
+        [(null? (cadr q)) (dequeue (list null (reverse (car q))))]
+        [#t (cons (caadr q) (list (car q) (cdadr q)))]))
 (queue)
-(define (q (enqueue 2 (enqueue 1 (queue)))))
-(dequeue q)
+(enqueue 2 (enqueue 1 (queue)))
+(empty-queue? (queue))
+(empty-queue? (list '(1 2) null))
+(dequeue (queue))
+(dequeue (list '(1 2) '(3 4 5)))
+(dequeue (list '(1 2) null))
+
+; Paskalov trikotnik
+(define (pascalov-trikotnik n)
+  (define (pasc-level level)
+    (
+  (define (pasc-acc n l acc)
+    (if [> n l]
+      (reverse acc)
+      (pasc-acc n (+ l 1) (cons level acc))))
+  (pasc-acc n 1 null))

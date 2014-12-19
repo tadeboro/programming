@@ -59,7 +59,7 @@
 (define (odstrani-ponovljene sez)
   (cond [(null? sez) null]
         [(null? (cdr sez)) sez]
-        [#t (let ([prvi (car sez)]
+        [else (let ([prvi (car sez)]
                   [drugi (car (cdr sez))])
               (if (equal? prvi drugi)
                   (odstrani-ponovljene (cdr sez))
@@ -76,7 +76,7 @@
 (define (dequeue q)
   (cond [(empty-queue? q) (cons void q)]
         [(null? (cadr q)) (dequeue (list null (reverse (car q))))]
-        [#t (cons (caadr q) (list (car q) (cdadr q)))]))
+        [else (cons (caadr q) (list (car q) (cdadr q)))]))
 (queue)
 (enqueue 2 (enqueue 1 (queue)))
 (empty-queue? (queue))
@@ -85,12 +85,21 @@
 (dequeue (list '(1 2) '(3 4 5)))
 (dequeue (list '(1 2) null))
 
+
 ; Paskalov trikotnik
 (define (pascalov-trikotnik n)
-  (define (pasc-level level)
-    (
-  (define (pasc-acc n l acc)
-    (if [> n l]
+  (define (sums l)
+    (cond [(null? l) null]
+          [(null? (cdr l)) l]
+          [else (cons (+ (car l) (cadr l)) (sums (cdr l)))]))
+  (define (pasc-acc n i acc)
+    (if (>= i n)
       (reverse acc)
-      (pasc-acc n (+ l 1) (cons level acc))))
-  (pasc-acc n 1 null))
+      (pasc-acc n (+ i 1) (cons (cons 1 (sums (car acc))) acc))))
+  (pasc-acc n 1 (list '(1))))
+(pascalov-trikotnik 1)
+(pascalov-trikotnik 2)
+(pascalov-trikotnik 5)
+
+; Palindromi dolžine največ n
+(define (generiraj-palindrome n els

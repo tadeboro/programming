@@ -60,7 +60,7 @@
   (cond [(null? sez) null]
         [(null? (cdr sez)) sez]
         [else (let ([prvi (car sez)]
-                  [drugi (car (cdr sez))])
+                    [drugi (car (cdr sez))])
               (if (equal? prvi drugi)
                   (odstrani-ponovljene (cdr sez))
                   (cons prvi (odstrani-ponovljene (cdr sez)))))]))
@@ -101,5 +101,31 @@
 (pascalov-trikotnik 2)
 (pascalov-trikotnik 5)
 
+; Insert e into all elements of ls
+(define (ins-in-all e ls)
+  (map (lambda (l) (cons e l)) ls))
+; Insert all elements of es into all elements of ls
+(define (ins-all-in-all es ls)
+  (foldl (lambda (e acc)
+           (append acc (ins-in-all e ls)))
+         null
+         es))
+; Generate all combinations of elements es of length n
+(define (combinations n es)
+  (foldl (lambda (i acc)
+           (ins-all-in-all es acc))
+         (list null)
+         (range n)))
+; Generate all palindromes of elements es of length n
+(define (palindrome n es)
+  (let ([combs (combinations (ceiling (/ n 2)) es)])
+    (if (odd? n)
+      (map (lambda (ls) (append ls (cdr (reverse ls)))) combs)
+      (map (lambda (ls) (append ls (reverse ls))) combs))))
 ; Palindromi dolžine največ n
-(define (generiraj-palindrome n els
+(define (generiraj-palindrome n es)
+  (foldl
+    (lambda (i acc) (append acc (palindrome i es)))
+    null
+    (range n)))
+(generiraj-palindrome 4 '(1 2 3))

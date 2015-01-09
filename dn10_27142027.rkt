@@ -3,21 +3,24 @@
 ; Tok števil
 (define moj-generator-stevil
   (letrec ([f (lambda (x)
-                (cons (if (= (remainder x 3) 0)
-                        (- x)
-                        x)
-                      (lambda () f (+ x 1))))])
+                (cons (if (= (remainder x 3) 0) (- x) x)
+                      (lambda () (f (+ x 1)))))])
     (lambda () (f 1))))
+(displayln "\n=== moj-generator-stevil ===")
+(car (moj-generator-stevil))
+(car ((cdr (moj-generator-stevil))))
+(car ((cdr ((cdr (moj-generator-stevil))))))
 
 ; Izpiši prvih n elementov toka
 (define (prvih-n gen n)
-  (if (< n 1)
+  (if (< n 2)
     (displayln (car (gen)))
     (let ([tok (gen)])
       (begin
         (displayln (car tok))
         (prvih-n (cdr tok) (- n 1))))))
-;(prvih-n moj-generator-stevil 3)
+(displayln "\n=== prvih-n moj-generator-stevil 6 ===")
+(prvih-n moj-generator-stevil 6)
 
 ; Generiraj poljuben tok
 (define (generiraj-tok fun arg)
@@ -25,18 +28,25 @@
                 (cons x
                       (lambda () (f (fun x arg)))))])
     (lambda () (f arg))))
-
-; Definiraj naravna števila
+; Definiraj naravna števila in potence števila 2
+(displayln "\n=== generiraj-tok + 1 ===")
 (define naravna-st (generiraj-tok + 1))
+(prvih-n naravna-st 6)
+(displayln "\n=== generiraj-tok * 2 ===")
 (define potence-st-dva (generiraj-tok * 2))
+(prvih-n potence-st-dva 6)
 
-; Vrni seznam začetka elementov, ki ne ustrezajo pogoju
+; Vrni seznam zaporednih elementov toka. Elemente dodajaj v seznam
+; dokler tester vrača #f.
 (define (generiraj-dokler gen tester)
-  (let ([tok (gen)])
-    (if (tester (car tok))
-      null
-      (cons (car tok) (generiraj-dokler (cdr tok) tester)))))
-;(define test (generiraj-dokler naravna-st (lambda (x) (x > 10))))
+  (define (gen-acc gen acc)
+    (let ([tok (gen)])
+      (if (tester (car tok))
+        (reverse acc)
+        (gen-acc (cdr tok) (cons (car tok) acc)))))
+  (gen-acc gen null))
+(displayln "\n=== generiraj-dokler naravna-st (> x 10) ===")
+(generiraj-dokler naravna-st (lambda (x) (> x 10)))
 
 ; Vrni element seznama
 (define (seznam-po-modulu sez n)
@@ -47,8 +57,37 @@
   (letrec ([f (lambda (n)
                 (cons (cons (seznam-po-modulu sez1 n)
                             (seznam-po-modulu sez2 n))
-                      (lambda () f (+ n 1))))])
+                      (lambda () (f (+ n 1)))))])
     (lambda () (f 0))))
+(displayln "\n=== krozi-po-seznamih '(1 2 3) '(4 5) ===")
+(prvih-n (krozi-po-seznamih '(1 2 3) '(4 5)) 6)
+
+; Funkcija, ki pove, če je število n deljivo z vsaj enim izmed števil v
+; seznamu sez.
+(define (deli sez n)
+  (cond [(null? sez) #f]
+        [(= (remainder n (car sez)) 0) #t]
+        [else (deli (cdr sez) n)]))
+; Funkcija, ki vrne naslednje prastevilo glede na seznam. Praštevila v
+; seznamu morajo biti urejena v padajočem vrstnem redu.
+(define (naslednje-prastevilo sez)
+  (if (null? sez)
+    2
+    (let ([rsez (reverse sez)])
+      (define (np n)
+        (if (deli rsez n) (np (+ n 1)) n))
+      (np (car sez)))))
+; Tok praštevil
+(define tok-prastevil
+  (let ([prastevila null])
+    (letrec ([f (lambda (x)
+                  (let ([n (naslednje-prastevilo prastevila)])
+                    (begin
+                      (set! prastevila (cons n prastevila))
+                      (cons n (lambda () (f n))))))])
+      (lambda () (f 2)))))
+(displayln "\n=== tok-prastevil ===")
+(prvih-n tok-prastevil 10)
 
 ; Makroji
 ;(define-syntax ime
@@ -61,6 +100,7 @@
   (syntax-rules
     ()
     [(izracunaj arg1 op arg2) (op arg1 arg2)]))
+(displayln "\n=== izracunaj 2 + 3 ===")
 (izracunaj 2 + 3)
 
 ; Makro za for zanko
@@ -75,4 +115,16 @@
                           #t
                           (begin body (loop (+ x 1)))))])
          (loop l)))]))
-(for 2 to 5 do (displayln "a"))
+(displayln "\n=== for 2 to 5 do (display \"a\" ===")
+(for 2 to 5 do (display "a"))
+
+; Število elementov v toku, ki jih srečamo pred izpolnitvijo pogoja.
+(define (stevilo-preden gen pogoj)
+  (define (st-acc gen n)
+    (let ([tok (gen)])
+      (if (pogoj (car tok))
+        n
+        (st-acc (cdr tok) (+ n 1)))))
+  (st-acc gen 0))
+(displayln "\n===  2 to 5 do (display \"a\" ===")
+(stevilo-preden naravna-st (lambda (x) (> x 10)))

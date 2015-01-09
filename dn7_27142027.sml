@@ -90,7 +90,7 @@ and 'a pcell = Nil | Cons of 'a * 'a pcl
 
 (* Funkcije za delo s tipom pcl *)
 exception Empty
-fun nill () = Pcl (ref Nil) : int pcl
+fun nill () = Pcl (ref Nil)
 fun cons arg = Pcl (ref (Cons arg))
 fun car (Pcl arg) =
   case !arg of
@@ -130,3 +130,9 @@ fun take n pclist =
   end
 val t25 = take 10 t22
 val t26 = take 10 t24
+
+(*Funkcija toList' vzame zraven še naravno število, s katerim povemo koliko elementov želimo. Ta lepo vrača rezultat.*)
+fun toList' ((Pcl (ref Nil)), _) = []
+	|toList' (_, 0) = []
+	|toList' (x, n) = (car x)::(toList'(cdr x, n-1)) 
+val t27 = toList' (t24, 10)

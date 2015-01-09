@@ -126,5 +126,21 @@
         n
         (st-acc (cdr tok) (+ n 1)))))
   (st-acc gen 0))
-(displayln "\n===  2 to 5 do (display \"a\" ===")
+(displayln "\n===  stevilo-preden naravna > 10 ===")
 (stevilo-preden naravna-st (lambda (x) (> x 10)))
+
+; While less makro
+(define-syntax while-less
+  (syntax-rules
+    (do)
+    [(while-less e1 do e2)
+     (let ([e1val e1])
+       (letrec ([loop (lambda ()
+                        (let ([e2val e2])
+                          (if (> e1val e2val) (loop) #t)))])
+         (loop)))]))
+(displayln "\n===  while-less ===")
+(define a 6)
+(while-less 5 do (begin (set! a (+ a 1)) (display "x ") a))
+(set! a 1)
+(while-less 5 do (begin (set! a (+ a 1)) (display "x ") a))

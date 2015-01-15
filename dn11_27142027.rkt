@@ -25,4 +25,30 @@
 (define tok (tok-pascalovega-trikotnika))
 
 (displayln "\n=== Tok pascalovih stevil ===")
-(prvih-n (tok-pascalovega-trikotnika) 3)
+(prvih-n (tok-pascalovega-trikotnika) 5)
+
+(define (stevilo-nacinov n)
+  (define (zanka i)
+    (cond [(> i n) 0]
+          [(= i n) 1]
+          [else (+ (stevilo-nacinov (- n i)) (zanka (+ i 1)))]))
+  (if (< n 1)
+    0
+    (zanka 1)))
+(displayln "\n=== Stevilo nacinov ===")
+(stevilo-nacinov 5)
+
+(define (stevilo-nacinov-memo n)
+  (let ([memo (make-hash)])
+    (lambda ()
+      (define (zanka i)
+        (cond [(> i n) 0]
+              [(= i n) 1]
+              [else (+ ((stevilo-nacinov-memo (- n i))) (zanka (+ i 1)))]))
+      (hash-ref! memo n (if (< n 1) 0 (zanka 1))))))
+(displayln "\n=== Stevilo nacinov memo ===")
+((stevilo-nacinov-memo 1))
+((stevilo-nacinov-memo 2))
+((stevilo-nacinov-memo 3))
+((stevilo-nacinov-memo 4))
+((stevilo-nacinov-memo 5))
